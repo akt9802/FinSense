@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -11,17 +14,10 @@ export default function Signup() {
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-//   const strength = useMemo(() => {
-//     let score = 0;
-//     if (password.length >= 6) score++;
-//     if (/[A-Z]/.test(password)) score++;
-//     if (/[0-9]/.test(password)) score++;
-//     if (/[^A-Za-z0-9]/.test(password)) score++;
-//     return score; // 0..4
-//   }, [password]);
-
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -43,16 +39,38 @@ export default function Signup() {
       return;
     }
 
-    // TODO: call real signup API
-    console.log({ name, email, password });
-    setSuccess("Account created (mock). You can now log in.");
-    setName("");
-    setEmail("");
-    setPassword("");
-    setAgreed(false);
+    try {
+      setLoading(true);
+      const response = await fetch(`${BACKEND_URL}/api/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      if (!response.ok) {
+        const { message } = await response.json();
+        setError(message || "Signup failed. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      const { token } = await response.json();
+      localStorage.setItem("token", token);
+      setSuccess("Account created successfully! Redirecting...");
+      setTimeout(() => {
+        setLoading(false);
+        router.push("/dashboard");
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+      setError("An error occurred. Please try again.");
+      setLoading(false);
+    }
   }
 
-  const canSubmit = Boolean(name.trim() && email.trim() && password && password.length >= 6 && agreed);
+  const canSubmit = Boolean(name.trim() && email.trim() && password && password.length >= 6 && agreed && !loading);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-white py-12 px-4">
@@ -154,13 +172,6 @@ export default function Signup() {
                 </button>
               </div>
 
-              {/* <div className="mt-3 flex items-center gap-2">
-                <div className={`h-2 rounded flex-1 ${strength >= 1 ? "bg-teal-300" : "bg-slate-100"}`} />
-                <div className={`h-2 rounded flex-1 ${strength >= 2 ? "bg-teal-300" : "bg-slate-100"}`} />
-                <div className={`h-2 rounded flex-1 ${strength >= 3 ? "bg-teal-400" : "bg-slate-100"}`} />
-                <div className={`h-2 rounded flex-1 ${strength >= 4 ? "bg-teal-500" : "bg-slate-100"}`} />
-              </div> */}
-
               <div className="mt-2 text-xs text-slate-500">
                 Password must be at least 6 characters. Use a mix of letters, numbers, and symbols for a stronger password.
               </div>
@@ -186,7 +197,7 @@ export default function Signup() {
               disabled={!canSubmit}
               className={`w-full inline-flex items-center justify-center ${canSubmit ? "bg-gradient-to-r from-teal-500 to-teal-400 text-white shadow-md hover:from-teal-600 hover:to-teal-500" : "bg-slate-100 text-slate-400"} px-4 py-3 rounded-lg font-medium transition disabled:opacity-80`}
             >
-              Create account
+              {loading ? "Creating account..." : "Create account"}
             </button>
           </form>
 

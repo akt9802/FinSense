@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -10,8 +13,9 @@ export default function Login() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -21,15 +25,37 @@ export default function Login() {
       return;
     }
 
-    setLoading(true);
-    // TODO: call real auth API
-    console.log({ email, password });
-    setTimeout(() => {
+    try {
+      console.log("Sending request...");
+      setLoading(true);
+      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      console.log("Request sent");
+
+      if (!response.ok) {
+        const { message } = await response.json();
+        setError(message || "Login failed. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      const { token } = await response.json();
+      localStorage.setItem("token", token);
+      setSuccess("Login successful! Redirecting...");
+      setTimeout(() => {
+        setLoading(false); // Ensure loading is reset before redirect
+        router.push("/dashboard");
+      }, 2000);
+    } catch (err) {
+      console.error("Error during login:", err);
+      setError("An error occurred. Please try again.");
       setLoading(false);
-      setSuccess("Logged in (mock). Redirecting...");
-      setEmail("");
-      setPassword("");
-    }, 700);
+    }
   }
 
   return (
