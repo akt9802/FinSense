@@ -1,11 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 export default function Dashboard() {
   const [range, setRange] = useState("This month");
   const [selectedMonth, setSelectedMonth] = useState("2025-10");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const event = new Event("userAuthenticated");
+      window.dispatchEvent(event);
+    }
+  }, []);
 
   // mock per-month dataset
   const perMonth = useMemo<Record<string, { total: number; categories: number[]; recent: { id: number; label: string; amount: number; date: string; category: string }[] }>>(
