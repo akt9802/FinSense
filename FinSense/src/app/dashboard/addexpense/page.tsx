@@ -14,7 +14,7 @@ export default function AddExpense() {
   const [recurring, setRecurring] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [recurringExpenses, setRecurringExpenses] = useState<Array<{ amount: number; merchant: string; category: string }>>([]);
+  const [recurringExpenses, setRecurringExpenses] = useState<Array<{ _id: string; amount: number; merchant: string; category: string }>>([]);
   const [showPopup, setShowPopup] = useState(false); // State for popup visibility
 
   useEffect(() => {
@@ -32,7 +32,10 @@ export default function AddExpense() {
             Authorization: `Bearer ${token}`,
           },
         });
-        setRecurringExpenses(response.data.recurringExpenses);
+        setRecurringExpenses(response.data.recurringExpenses.map((expense: { _id: string; amount: number; merchant: string; category: string }) => ({
+          ...expense,
+          _id: expense._id,
+        })));
       } catch (err) {
         if (axios.isAxiosError(err)) {
           setError(err.response?.data?.error || "Failed to fetch recurring expenses.");
@@ -98,7 +101,7 @@ export default function AddExpense() {
       if (recurring) {
         setRecurringExpenses((prev) => [
           ...prev,
-          { amount: Number(amount), merchant, category },
+          { _id: "temp-id", amount: Number(amount), merchant, category },
         ]);
       }
 
@@ -124,8 +127,28 @@ export default function AddExpense() {
     }
   }
 
-  function removeRecurringExpense(index: number) {
-    setRecurringExpenses((prev) => prev.filter((_, i) => i !== index));
+  async function removeRecurringExpense(index: number, expenseId: string) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("User not authenticated.");
+      return;
+    }
+
+    try {
+      await axios.put(`${API_BASE_URL}/api/auth/update-recurring/${expenseId}`, null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setRecurringExpenses((prev) => prev.filter((_, i) => i !== index));
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.error || "Failed to update recurring expense.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
+    }
   }
 
   const categories = ["Food", "Travel", "Bills", "Shopping", "Entertainment", "Others"];
@@ -153,7 +176,7 @@ export default function AddExpense() {
                       <div className="text-xs text-slate-500">₹ {expense.amount.toLocaleString()} - {expense.category}</div>
                     </div>
                     <button
-                      onClick={() => removeRecurringExpense(index)}
+                      onClick={() => removeRecurringExpense(index, expense._id)}
                       className="text-red-500 hover:text-red-700 focus:outline-none"
                       aria-label="Remove recurring expense"
                     >
