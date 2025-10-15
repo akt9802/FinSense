@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+
 export default function AddExpense() {
   const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [amount, setAmount] = useState<string>("");
@@ -16,17 +18,32 @@ export default function AddExpense() {
   const [showPopup, setShowPopup] = useState(false); // State for popup visibility
 
   useEffect(() => {
-    // Load recurring expenses from localStorage
-    const savedRecurring = localStorage.getItem("recurringExpenses");
-    if (savedRecurring) {
-      setRecurringExpenses(JSON.parse(savedRecurring));
-    }
-  }, []);
+    // Fetch recurring expenses from the backend
+    async function fetchRecurringExpenses() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("User not authenticated.");
+        return;
+      }
 
-  useEffect(() => {
-    // Save recurring expenses to localStorage
-    localStorage.setItem("recurringExpenses", JSON.stringify(recurringExpenses));
-  }, [recurringExpenses]);
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/auth/recurring-expenses`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setRecurringExpenses(response.data.recurringExpenses);
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          setError(err.response?.data?.error || "Failed to fetch recurring expenses.");
+        } else {
+          setError("An unexpected error occurred.");
+        }
+      }
+    }
+
+    fetchRecurringExpenses();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -56,22 +73,6 @@ export default function AddExpense() {
         setLoading(false);
         return;
       }
-
-      const expense = {
-        userId, // Include userId in the payload
-        date,
-        amount: Number(amount),
-        merchant,
-        category,
-        notes,
-        recurring,
-      };
-
-      const response = await axios.post("http://localhost:5000/api/auth/addexpense", expense, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
 
       if (recurring) {
         setRecurringExpenses((prev) => [
