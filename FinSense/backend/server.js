@@ -5,6 +5,7 @@ import authRoutes from './routes/authRoutes.js';
 import addExpenseRoute from './routes/addExpense.js';
 import recurringExpenseRoute from './routes/recurringExpense.js';
 import updateRecurringRoute from './routes/updateRecurring.js';
+import planMonthRoute from './routes/planMonth.js';
 import cors from 'cors';
 
 // Load environment variables
@@ -19,12 +20,12 @@ const app = express();
 app.use(express.json());
 
 // Middleware to log requests
-// app.use((req, res, next) => {
-//   console.log('Request Headers:', req.headers);
-//   console.log('Request Method:', req.method);
-//   console.log('Request URL:', req.url);
-//   next();
-// });
+app.use((req, res, next) => {
+  console.log('Request Headers:', req.headers);
+  console.log('Request Method:', req.method);
+  console.log('Request URL:', req.url);
+  next();
+});
 
 // Enable CORS
 app.use(cors({
@@ -38,6 +39,21 @@ app.use('/api/auth', authRoutes);
 app.use('/api/auth', addExpenseRoute);
 app.use('/api/auth', recurringExpenseRoute);
 app.use('/api/auth', updateRecurringRoute);
+app.use('/api/auth', planMonthRoute);
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ 
+    message: 'Server is running!', 
+    timestamp: new Date().toISOString(),
+    env: {
+      nodeEnv: process.env.NODE_ENV || 'development',
+      port: process.env.PORT || 5000,
+      jwtSecret: process.env.JWT_SECRET ? 'Present' : 'Missing',
+      mongoUri: process.env.MONGO_URI ? 'Present' : 'Missing'
+    }
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 

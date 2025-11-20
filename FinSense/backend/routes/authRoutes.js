@@ -5,6 +5,18 @@ import User from '../models/userModel.js';
 
 const router = express.Router();
 
+// Test route to verify server is working
+router.get('/test', (req, res) => {
+  res.status(200).json({ 
+    message: 'Auth routes working!', 
+    timestamp: new Date().toISOString(),
+    env: {
+      jwtSecret: process.env.JWT_SECRET ? 'Present' : 'Missing',
+      mongoUri: process.env.MONGO_URI ? 'Present' : 'Missing'
+    }
+  });
+});
+
 // Signup route
 router.post('/signup', async (req, res) => {
   console.log('Request Body:', req.body); // Debugging log
@@ -67,6 +79,57 @@ router.post('/login', async (req, res) => {
     res.status(200).json({ message: 'Login successful', token });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get user profile route
+router.get('/profile', async (req, res) => {
+  console.log('Profile route hit');
+  console.log('Headers:', req.headers);
+  
+  try {
+    // Get token from header
+    const token = req.headers.authorization?.split(' ')[1];
+    console.log('Token extracted:', token ? 'Token present' : 'No token');
+    
+    if (!token) {
+      console.log('No token provided');
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    // Verify token
+    console.log('Verifying token...');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Token decoded successfully:', decoded);
+    
+    // Find user by ID (exclude password and expenses for profile)
+    console.log('Finding user with ID:', decoded.id);
+    const user = await User.findById(decoded.id).select('-password -expenses');
+    console.log('User found:', user ? 'Yes' : 'No');
+    
+    if (!user) {
+      console.log('User not found in database');
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    console.log('Sending user profile response');
+    res.status(200).json({ 
+      message: 'Profile retrieved successfully', 
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('Profile route error:', error);
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token expired' });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 });
