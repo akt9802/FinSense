@@ -5,7 +5,7 @@ import User from "../models/userModel.js";
 const router = express.Router();
 
 // Route to fetch recurring expenses
-router.get("/ ", async (req, res) => {
+router.get("/recurringexpenses", async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
@@ -26,10 +26,15 @@ router.get("/ ", async (req, res) => {
       return res.status(404).json({ error: "User not found." });
     }
 
-    const recurringExpenses = user.expenses.filter((expense) => expense.recurring);
-    res.status(200).json({ recurringExpenses });
+    // Check if expenses array exists and filter recurring expenses
+    const recurringExpenses = user.expenses ? user.expenses.filter((expense) => expense.recurring === true) : [];
+    
+    res.status(200).json({ 
+      success: true,
+      recurringExpenses: recurringExpenses 
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching recurring expenses:", error);
     res.status(500).json({ error: "Server error." });
   }
 });

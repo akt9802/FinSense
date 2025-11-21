@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -180,7 +181,7 @@ export default function Login() {
 
           <div className="mt-4 flex items-center justify-between text-sm text-slate-600">
             <div>
-              Don&apos;t have an account? <a className="text-teal-600 hover:underline" href="/signup">Create account</a>
+              Don&apos;t have an account? <Link className="text-teal-600 hover:underline" href="/signup">Create account</Link>
             </div>
             <a href="#" className="text-slate-500 hover:underline">Forgot?</a>
           </div>
