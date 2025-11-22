@@ -1,62 +1,109 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+
+interface CategoryBudgets {
+  food: number;
+  travel: number;
+  bills: number;
+  shopping: number;
+  entertainment: number;
+  others: number;
+}
+
+interface Plan {
+  _id?: string;
+  month: string;
+  totalBudget: number;
+  categoryBudgets: CategoryBudgets;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export default function PlanMonth() {
   const router = useRouter();
   const [month, setMonth] = useState<string>(new Date().toISOString().slice(0, 7)); // YYYY-MM (editing/active month)
-  const categories = useMemo(() => ["Food", "Travel", "Bills", "Shopping", "Entertainment", "Others"], []);
+  const categories = useMemo(() => ["food", "travel", "bills", "shopping", "entertainment", "others"], []);
   const [totalBudget, setTotalBudget] = useState<number | "">("");
   const [catBudgets, setCatBudgets] = useState<Record<string, number | "">>(() => {
     const obj: Record<string, number | ""> = {};
-    ["Food", "Travel", "Bills", "Shopping", "Entertainment", "Others"].forEach((c) => (obj[c] = ""));
+    ["food", "travel", "bills", "shopping", "entertainment", "others"].forEach((c) => (obj[c] = ""));
     return obj;
   });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [savedPlans, setSavedPlans] = useState<Array<{ month: string; total: number; categories: Record<string, number | ""> }>>([]);
+  const [savedPlans, setSavedPlans] = useState<Plan[]>([]);
   const [activeSidebar, setActiveSidebar] = useState<string | null>(null);
   const [copySource, setCopySource] = useState<string>("");
 
-  useEffect(() => {
-    // load saved plan for selected month
-    try {
-      const raw = localStorage.getItem(`plan:${month}`);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setTotalBudget(parsed.total ?? "");
-        setCatBudgets(parsed.categories ?? {});
-      }
-    } catch {
-      // ignore parse errors
-    }
-  }, [month]);
+  // Get JWT token from localStorage
+  const getAuthToken = () => {
+    return localStorage.getItem('token');
+  };
 
-  // load list of saved plans for sidebar
-  useEffect(() => {
+  // Shared function to fetch all plans
+  const fetchAllPlans = useCallback(async () => {
     try {
-      const plans: Array<{ month: string; total: number; categories: Record<string, number | ""> }> = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i) || "";
-        if (key.startsWith("plan:")) {
-          const m = key.replace("plan:", "");
-          try {
-            const raw = localStorage.getItem(key) as string;
-            const parsed = JSON.parse(raw);
-            plans.push({ month: m, total: parsed.total ?? 0, categories: parsed.categories ?? {} });
-          } catch {
-            // skip
-          }
-        }
+      const token = getAuthToken();
+      if (!token) return;
+
+      const response = await fetch('http://localhost:5000/api/auth/plan-months', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSavedPlans(data.plans || []);
       }
-      // sort descending by month and set list
-      plans.sort((a, b) => (a.month < b.month ? 1 : -1));
-      setSavedPlans(plans);
-    } catch {
-      // ignore
+    } catch (error) {
+      console.error('Error fetching plans:', error);
     }
   }, []);
+
+  // Load all plans on component mount
+  useEffect(() => {
+    fetchAllPlans();
+  }, [fetchAllPlans]);
+
+  // Load specific plan when month changes
+  useEffect(() => {
+    const fetchPlanByMonth = async (monthToFetch: string) => {
+      try {
+        const token = getAuthToken();
+        if (!token) return;
+
+        const response = await fetch(`http://localhost:5000/api/auth/plan-month/${monthToFetch}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const plan = data.plan;
+          setTotalBudget(plan.totalBudget);
+          setCatBudgets(plan.categoryBudgets || {});
+        } else {
+          // Plan doesn't exist for this month, reset form
+          setTotalBudget("");
+          setCatBudgets(() => {
+            const obj: Record<string, number | ""> = {};
+            categories.forEach((c) => (obj[c] = ""));
+            return obj;
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching plan:', error);
+      }
+    };
+
+    fetchPlanByMonth(month);
+  }, [month, categories]);
 
   const sumCat = useMemo(() => {
     return categories.reduce((s, c) => s + (Number(catBudgets[c] || 0) || 0), 0);
@@ -67,7 +114,7 @@ export default function PlanMonth() {
     setCatBudgets((prev) => ({ ...prev, [c]: num }));
   }
 
-  function handleSave() {
+  async function handleSave() {
     setError(null);
     if (totalBudget === "" || Number(totalBudget) <= 0) {
       setError("Please enter a valid total budget.");
@@ -79,57 +126,104 @@ export default function PlanMonth() {
     }
 
     setSaving(true);
-    const payload = { month, total: Number(totalBudget), categories: catBudgets };
-    // save to localStorage as mock persistence
-    localStorage.setItem(`plan:${month}`, JSON.stringify(payload));
-    // refresh sidebar list
-    setSavedPlans((prev) => {
-      const exists = prev.find((p) => p.month === month);
-      if (exists) {
-        return prev.map((p) => (p.month === month ? { month, total: Number(totalBudget), categories: catBudgets } : p));
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        setError("Please login to save plans");
+        setSaving(false);
+        return;
       }
-      return [{ month, total: Number(totalBudget), categories: catBudgets }, ...prev].sort((a, b) => (a.month < b.month ? 1 : -1));
-    });
-    setTimeout(() => {
+
+      const categoryBudgets: CategoryBudgets = {
+        food: Number(catBudgets.food || 0),
+        travel: Number(catBudgets.travel || 0),
+        bills: Number(catBudgets.bills || 0),
+        shopping: Number(catBudgets.shopping || 0),
+        entertainment: Number(catBudgets.entertainment || 0),
+        others: Number(catBudgets.others || 0),
+      };
+
+      const response = await fetch('http://localhost:5000/api/auth/plan-month', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          month,
+          totalBudget: Number(totalBudget),
+          categoryBudgets,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Plan saved:', data.message);
+        // Refresh the plans list
+        await fetchAllPlans();
+        setTimeout(() => {
+          setSaving(false);
+          router.push('/dashboard');
+        }, 600);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to save plan');
+        setSaving(false);
+      }
+    } catch (error) {
+      console.error('Error saving plan:', error);
+      setError('Failed to save plan');
       setSaving(false);
-      router.push('/dashboard');
-    }, 600);
+    }
   }
 
   function loadPlanIntoEditor(m: string) {
-    try {
-      const raw = localStorage.getItem(`plan:${m}`);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      setMonth(m);
-      setTotalBudget(parsed.total ?? "");
-      setCatBudgets(parsed.categories ?? {});
-      setActiveSidebar(m);
-    } catch {
-      // ignore
-    }
+    setMonth(m);
+    setActiveSidebar(m);
+    // fetchPlanByMonth will be called automatically by useEffect when month changes
   }
 
-  function handleDeletePlan() {
+  async function handleDeletePlan() {
     // confirm deletion
     if (!confirm(`Delete plan for ${new Date(month + "-01").toLocaleString(undefined, { month: 'long', year: 'numeric' })}? This cannot be undone.`)) return;
+    
     try {
-      localStorage.removeItem(`plan:${month}`);
-    } catch {
-      // ignore
+      const token = getAuthToken();
+      if (!token) {
+        setError("Please login to delete plans");
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/auth/plan-month/${month}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Refresh the plans list
+        await fetchAllPlans();
+        
+        // clear editor and active selection
+        const today = new Date().toISOString().slice(0, 7);
+        setMonth(today);
+        setTotalBudget("");
+        setCatBudgets(() => {
+          const o: Record<string, number | ""> = {};
+          categories.forEach((c) => (o[c] = ""));
+          return o;
+        });
+        setActiveSidebar(null);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to delete plan');
+      }
+    } catch (error) {
+      console.error('Error deleting plan:', error);
+      setError('Failed to delete plan');
     }
-    // update sidebar list
-    setSavedPlans((prev) => prev.filter((p) => p.month !== month));
-    // clear editor and active selection
-    const today = new Date().toISOString().slice(0, 7);
-    setMonth(today);
-    setTotalBudget("");
-    setCatBudgets(() => {
-      const o: Record<string, number | ""> = {};
-      categories.forEach((c) => (o[c] = ""));
-      return o;
-    });
-    setActiveSidebar(null);
   }
 
   return (
@@ -168,22 +262,23 @@ export default function PlanMonth() {
                         <select value={copySource} onChange={(e) => setCopySource(e.target.value)} className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm">
                           <option value="">Select month</option>
                           {savedPlans.map((p) => (
-                            <option key={p.month} value={p.month}>{new Date(p.month + "-01").toLocaleString(undefined, { month: 'short', year: 'numeric' })} — ₹ {p.total.toLocaleString()}</option>
+                            <option key={p.month} value={p.month}>{new Date(p.month + "-01").toLocaleString(undefined, { month: 'short', year: 'numeric' })} — ₹ {p.totalBudget.toLocaleString()}</option>
                           ))}
                         </select>
                         <button onClick={() => {
                           if (!copySource) return;
-                          try {
-                            const raw = localStorage.getItem(`plan:${copySource}`);
-                            if (!raw) return;
-                            const parsed = JSON.parse(raw);
-                            // copy values into editor but keep current `month` (user can set month for new plan)
-                            setTotalBudget(parsed.total ?? "");
-                            setCatBudgets(parsed.categories ?? {});
-                            // keep New plan active
+                          const sourcePlan = savedPlans.find(p => p.month === copySource);
+                          if (sourcePlan) {
+                            setTotalBudget(sourcePlan.totalBudget);
+                            setCatBudgets({
+                              food: sourcePlan.categoryBudgets?.food || "",
+                              travel: sourcePlan.categoryBudgets?.travel || "",
+                              bills: sourcePlan.categoryBudgets?.bills || "",
+                              shopping: sourcePlan.categoryBudgets?.shopping || "",
+                              entertainment: sourcePlan.categoryBudgets?.entertainment || "",
+                              others: sourcePlan.categoryBudgets?.others || "",
+                            });
                             setActiveSidebar(null);
-                          } catch {
-                            // ignore
                           }
                         }} className={`px-3 py-2 rounded-lg text-sm ${!copySource ? 'bg-slate-200 text-slate-400' : 'bg-white border'}`} disabled={!copySource}>Copy</button>
                       </div>
@@ -194,7 +289,7 @@ export default function PlanMonth() {
                     <button key={p.month} onClick={() => loadPlanIntoEditor(p.month)} className={`w-full text-left px-3 py-2 rounded-lg border flex items-center justify-between ${activeSidebar===p.month? 'bg-teal-50 border-teal-200': 'bg-white'}`}>
                       <div>
                         <div className="text-sm font-medium">{new Date(p.month + "-01").toLocaleString(undefined, { month: 'long', year: 'numeric' })}</div>
-                        <div className="text-xs text-slate-500">₹ {p.total.toLocaleString()}</div>
+                        <div className="text-xs text-slate-500">₹ {p.totalBudget.toLocaleString()}</div>
                       </div>
                       <div className="text-xs text-slate-400">View</div>
                     </button>
@@ -253,11 +348,18 @@ export default function PlanMonth() {
                       setCatBudgets(next);
                     }} className="px-3 py-1 text-sm bg-white rounded border">Evenly distribute</button>
                     <button onClick={() => {
-                      // lightweight proportional distribution: 20% Food, then equal split rest
+                      // lightweight proportional distribution: 25% Food, then weighted split rest
                       if (totalBudget === "" || Number(totalBudget) <= 0) return;
                       const t = Number(totalBudget);
                       const next: Record<string, number | ""> = {};
-                      const weights: Record<string, number> = { Food: 0.25, Travel: 0.15, Bills: 0.2, Shopping: 0.15, Entertainment: 0.15, Others: 0.1 };
+                      const weights: Record<string, number> = { 
+                        food: 0.25, 
+                        travel: 0.15, 
+                        bills: 0.2, 
+                        shopping: 0.15, 
+                        entertainment: 0.15, 
+                        others: 0.1 
+                      };
                       categories.forEach((c) => (next[c] = Math.round((weights[c] || 0.1) * t)));
                       setCatBudgets(next);
                     }} className="px-3 py-1 text-sm bg-white rounded border">Auto-distribute</button>
@@ -265,14 +367,15 @@ export default function PlanMonth() {
                 </div>
 
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {categories.map((c) => {
+                  {categories.map((c, index) => {
+                    const categoryLabel = ["Food", "Travel", "Bills", "Shopping", "Entertainment", "Others"][index];
                     const val = typeof catBudgets[c] === 'number' ? catBudgets[c] : 0;
                     const pct = totalBudget === "" || Number(totalBudget) === 0 ? 0 : Math.round((val / Number(totalBudget)) * 100);
                     return (
                       <div key={c} className="p-3 rounded-lg bg-white border border-slate-100 flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3">
-                            <div className="text-sm font-medium">{c}</div>
+                            <div className="text-sm font-medium">{categoryLabel}</div>
                             <div className="text-xs text-slate-400">{pct}%</div>
                           </div>
                           <div className="text-xs text-slate-500">Suggested: ₹ {Math.round((Number(totalBudget || 0) * 0.15))}</div>
