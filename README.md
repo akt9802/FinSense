@@ -1,4 +1,4 @@
-# 💰 FinSense - Intelligent Financial Analytics Platform
+# 💰 FinSense - Intelligent Financial Analysis Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.5-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.1.0-blue?style=flat-square&logo=react)](https://reactjs.org/)
