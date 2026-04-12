@@ -2,7 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import Link from "next/link";
+import { 
+  FiEye, 
+  FiEyeOff, 
+  FiArrowRight, 
+  FiMail, 
+  FiLock,
+  FiUser,
+  FiActivity,
+  FiShield,
+  FiCheckCircle
+} from "react-icons/fi";
 
 const BACKEND_URL = "";
 
@@ -77,81 +88,90 @@ export default function Signup() {
   const canSubmit = Boolean(name.trim() && email.trim() && password && password.length >= 6 && agreed && !loading);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-white py-12 px-4">
-      <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg overflow-hidden grid grid-cols-1 md:grid-cols-2">
-        {/* Illustration / Brand panel */}
-        <div className="hidden md:flex flex-col items-center justify-center gap-6 p-10 bg-gradient-to-b from-teal-600 to-teal-400 text-white">
-          <div className="flex items-center gap-3">
-            <div className="bg-white/20 rounded-full p-2">
-              <Image src="/logo-mark.svg" alt="FinSense" width={48} height={48} />
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 selection:bg-teal-200 text-slate-900 font-sans">
+      <div className="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200 overflow-hidden grid grid-cols-1 md:grid-cols-2">
+        {/* Brand panel */}
+        <div className="hidden md:flex flex-col items-center justify-center gap-10 p-12 bg-gradient-to-b from-teal-600 to-blue-700 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+          
+          <div className="relative z-10 w-full text-center">
+            <div className="inline-flex w-16 h-16 rounded-2xl bg-white/20 shadow-lg backdrop-blur-md items-center justify-center text-white text-2xl font-black tracking-tighter ring-1 ring-white/30 mb-6">
+              FS
             </div>
-            <div>
-              <h3 className="text-2xl font-bold">Welcome to FinSense</h3>
-              <p className="text-sm opacity-90">Smart, simple expense insights — powered by lightweight ML.</p>
+            <h3 className="text-3xl font-extrabold tracking-tight mb-2">Welcome to FinSense</h3>
+            <p className="text-sm font-medium text-teal-100">Smart, simple expense insights — powered by lightweight ML.</p>
+          </div>
+
+          <div className="relative z-10 w-full max-w-sm bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl transform hover:scale-105 transition-transform duration-500">
+            <div className="flex justify-between items-center mb-4 pb-4 border-b border-white/10">
+              <span className="text-xs font-bold uppercase tracking-wider text-teal-50">Monthly Sample</span>
+              <span className="text-xs font-bold text-teal-200 px-2 py-1 bg-white/10 rounded-full">Healthy Trend</span>
+            </div>
+            <div className="mt-4 flex items-end justify-between gap-2 h-28">
+              <div className="w-full rounded-t-lg bg-teal-300 relative group"><div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">70%</div></div>
+              <div className="w-full rounded-t-lg bg-blue-300 relative group pt-2"><div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">90%</div></div>
+              <div className="w-full rounded-t-lg bg-teal-400 relative group pt-6"><div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">50%</div></div>
+              <div className="w-full rounded-t-lg bg-emerald-300 relative group pt-10"><div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">30%</div></div>
             </div>
           </div>
 
-          <div className="w-full bg-white/10 rounded-xl p-4">
-            <p className="text-xs opacity-90">Monthly snapshot (example)</p>
-            <div className="mt-3 flex items-end gap-2 h-24">
-              <div className="w-6 rounded bg-white/80" style={{ height: 70 }} />
-              <div className="w-6 rounded bg-white/80" style={{ height: 110 }} />
-              <div className="w-6 rounded bg-white/80" style={{ height: 90 }} />
-              <div className="w-6 rounded bg-white/80" style={{ height: 50 }} />
-            </div>
-          </div>
-
-          <p className="text-xs text-white/90 max-w-xs text-center">Create an account to unlock personalized suggestions, category breakdowns and simple tips to save every month.</p>
+          <p className="relative z-10 text-sm font-medium text-teal-50 text-center max-w-xs leading-relaxed">
+            Create an account to unlock personalized suggestions, detailed category breakdowns, and simple tips to maximize savings.
+          </p>
         </div>
 
         {/* Form panel */}
-        <div className="p-8 md:p-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-white text-black rounded-full p-1 ring-1 ring-slate-100">
-              <Image src="/logo-mark.svg" alt="FinSense" width={40} height={40} />
-            </div>
-            <div>
-              <h2 className="text-xl text-black font-semibold">Create your FinSense account</h2>
-              <p className="text-sm text-slate-500">Start tracking and get personalized insights.</p>
-            </div>
+        <div className="py-12 px-8 sm:px-16 flex flex-col justify-center">
+          <div className="mb-8">
+            <h2 className="text-2xl text-slate-800 font-extrabold tracking-tight mb-2">Create your account</h2>
+            <p className="text-sm font-medium text-slate-500">Start tracking and get personalized insights instantly.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5 border-b border-slate-100 pb-8 mb-6">
             <div>
-              <label className="block text-xs text-slate-600 mb-2">Full name</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Full Name</label>
               <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiUser className="text-slate-400" />
+                </div>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full text-gray-600 px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-200 transition placeholder:text-gray-500 placeholder:text-sm"
-                  placeholder="Write your full name..."
+                  className="w-full pl-11 pr-4 py-3 border border-slate-200 bg-slate-50 font-semibold text-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:bg-white transition-all shadow-sm"
+                  placeholder="John Doe"
                   aria-label="Full name"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs text-slate-600 mb-2">Email</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Email Address</label>
               <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiMail className="text-slate-400" />
+                </div>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full text-gray-600 px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-200 transition placeholder:text-gray-500 placeholder:text-sm"
-                  placeholder="enter your email here"
+                  className="w-full pl-11 pr-4 py-3 border border-slate-200 bg-slate-50 font-semibold text-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:bg-white transition-all shadow-sm"
+                  placeholder="john@example.com"
                   aria-label="Email"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs text-slate-600 mb-2">Password</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Password</label>
               <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiLock className="text-slate-400" />
+                </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full text-gray-600 px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-200 transition pr-12 placeholder:text-gray-500 placeholder:text-sm"
+                  className="w-full pl-11 pr-12 py-3 border border-slate-200 bg-slate-50 font-semibold text-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:bg-white transition-all shadow-sm"
                   placeholder="At least 6 characters"
                   aria-label="Password"
                 />
@@ -159,39 +179,38 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-3 top-3 text-slate-500 hover:text-slate-700"
+                  className="absolute inset-y-0 right-3 flex items-center px-2 text-slate-400 hover:text-teal-600 transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                    {showPassword ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.94 6.11A9.97 9.97 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.02 10.02 0 01-1.8 3.02M9.88 9.88A3 3 0 0114.12 14.12" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    )}
+                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                 </button>
               </div>
+            </div>
 
-              <div className="mt-2 text-xs text-slate-500">
-                Password must be at least 6 characters. Use a mix of letters, numbers, and symbols for a stronger password.
+            <label className="flex items-start gap-4 cursor-pointer group mt-2 w-fit">
+              <div className="relative flex items-center justify-center mt-0.5">
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded bg-white checked:bg-teal-500 checked:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-1 transition-all cursor-pointer"
+                />
+                <FiCheckCircle size={14} className="absolute text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" strokeWidth={3} />
               </div>
-            </div>
+              <span className="text-sm font-medium text-slate-600 select-none">
+                I agree to FinSense's <a href="#" className="font-bold text-teal-600 hover:text-teal-700">Terms of Service</a> and <a href="#" className="font-bold text-teal-600 hover:text-teal-700">Privacy Policy</a>
+              </span>
+            </label>
 
-            <div className="flex items-center gap-3">
-              <input id="terms" type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="h-4 w-4 text-teal-600 rounded" />
-              <label htmlFor="terms" className="text-sm text-slate-600">I agree to the <a href="#" className="text-teal-600 hover:underline">terms and privacy</a></label>
-            </div>
-
-            {error && <div className="text-sm text-red-600">{error}</div>}
+            {error && (
+              <div className="p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3 text-red-700 text-sm font-bold animate-pulse mt-4">
+                <FiActivity size={18} className="shrink-0" />
+                {error}
+              </div>
+            )}
             {success && (
-              <div className="flex items-center gap-2 text-sm text-emerald-600">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center gap-3 text-emerald-700 text-sm font-bold mt-4">
+                <FiShield size={18} className="shrink-0" />
                 {success}
               </div>
             )}
@@ -199,14 +218,14 @@ export default function Signup() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className={`w-full inline-flex items-center justify-center ${canSubmit ? "bg-gradient-to-r from-teal-500 to-teal-400 text-white shadow-md hover:from-teal-600 hover:to-teal-500" : "bg-slate-100 text-slate-400"} px-4 py-3 rounded-lg font-medium transition disabled:opacity-80`}
+              className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold transition-all outline-none mt-6 ${canSubmit ? "bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white shadow-lg shadow-teal-500/20 transform hover:-translate-y-0.5" : "bg-slate-100 text-slate-400 cursor-not-allowed"} disabled:opacity-80`}
             >
-              {loading ? "Creating account..." : "Create account"}
+              {loading ? "Setting up workspace..." : "Create Account"} <FiArrowRight />
             </button>
           </form>
 
-          <div className="mt-4 text-center text-sm text-slate-600">
-            Already have an account? <a className="text-teal-600 hover:underline" href="/login">Log in</a>
+          <div className="text-center text-sm font-medium text-slate-600">
+            Already have an account? <Link className="text-teal-600 font-bold hover:text-teal-700 transition-colors" href="/login">Sign in</Link>
           </div>
         </div>
       </div>

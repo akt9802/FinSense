@@ -2,6 +2,18 @@
 
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { 
+  FiCalendar, 
+  FiPlus, 
+  FiCopy, 
+  FiFolder, 
+  FiSave, 
+  FiTrash2,
+  FiPieChart,
+  FiDollarSign,
+  FiActivity,
+  FiChevronRight
+} from "react-icons/fi";
 
 interface CategoryBudgets {
   food: number;
@@ -227,22 +239,34 @@ export default function PlanMonth() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-800">
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        <div className="bg-white rounded-3xl shadow-lg border border-slate-100 p-6">
-          <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-teal-200">
+      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10 pb-6 border-b border-slate-200/60">
+          <div className="flex items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-teal-400 shadow-lg shadow-teal-500/30 flex items-center justify-center text-white text-2xl font-bold tracking-tighter ring-4 ring-teal-50">
+              <FiCalendar />
+            </div>
             <div>
-              <h2 className="text-2xl font-semibold">Plan your month</h2>
-              <p className="text-sm text-slate-500 mt-1">Set an overall spending target and split it across categories. Select a saved plan from the left to load it.</p>
+              <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">Plan your month</h1>
+              <p className="text-sm text-slate-500 mt-1 font-medium">Set an overall spending target and split it across categories efficiently.</p>
             </div>
           </div>
+        </div>
 
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* Sidebar */}
-            <aside className="hidden md:block md:col-span-1">
-              <div className="sticky top-6">
-                <h4 className="text-sm font-semibold mb-3">Saved plans</h4>
-                <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          
+          {/* Sidebar */}
+          <aside className="hidden md:block md:col-span-1">
+            <div className="sticky top-6">
+              <div className="rounded-3xl bg-white border border-slate-100 p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-5">
+                  <FiFolder className="text-teal-600" size={18} />
+                  <h4 className="text-base font-bold text-slate-800">Saved plans</h4>
+                </div>
+                
+                <div className="space-y-3">
                   <button onClick={() => {
                     const today = new Date().toISOString().slice(0,7);
                     setMonth(today);
@@ -253,161 +277,228 @@ export default function PlanMonth() {
                       return o;
                     });
                     setActiveSidebar(null);
-                  }} className={`w-full text-left px-3 py-2 rounded-lg ${activeSidebar===null? 'bg-slate-100': 'bg-white'} border`}>+ New plan</button>
+                  }} 
+                  className={`w-full flex items-center gap-2 text-left px-4 py-3 rounded-xl font-semibold transition-all ${activeSidebar === null ? 'bg-slate-100 text-teal-700 border border-slate-200' : 'bg-slate-50 text-slate-600 border border-transparent hover:bg-slate-100'}`}>
+                    <FiPlus /> New Plan
+                  </button>
+                  
                   {/* Copy UI shown when New plan is active */}
                   {activeSidebar === null && (
-                    <div className="mt-2">
-                      <label className="block text-xs text-slate-500 mb-1">Copy from existing</label>
-                      <div className="flex gap-2">
-                        <select value={copySource} onChange={(e) => setCopySource(e.target.value)} className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                    <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-1"><FiCopy /> Copy existing</label>
+                      <div className="flex flex-col gap-2">
+                        <select 
+                          value={copySource} 
+                          onChange={(e) => setCopySource(e.target.value)} 
+                          className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-shadow"
+                        >
                           <option value="">Select month</option>
                           {savedPlans.map((p) => (
                             <option key={p.month} value={p.month}>{new Date(p.month + "-01").toLocaleString(undefined, { month: 'short', year: 'numeric' })} — ₹ {p.totalBudget.toLocaleString()}</option>
                           ))}
                         </select>
-                        <button onClick={() => {
-                          if (!copySource) return;
-                          const sourcePlan = savedPlans.find(p => p.month === copySource);
-                          if (sourcePlan) {
-                            setTotalBudget(sourcePlan.totalBudget);
-                            setCatBudgets({
-                              food: sourcePlan.categoryBudgets?.food || "",
-                              travel: sourcePlan.categoryBudgets?.travel || "",
-                              bills: sourcePlan.categoryBudgets?.bills || "",
-                              shopping: sourcePlan.categoryBudgets?.shopping || "",
-                              entertainment: sourcePlan.categoryBudgets?.entertainment || "",
-                              others: sourcePlan.categoryBudgets?.others || "",
-                            });
-                            setActiveSidebar(null);
-                          }
-                        }} className={`px-3 py-2 rounded-lg text-sm ${!copySource ? 'bg-slate-200 text-slate-400' : 'bg-white border'}`} disabled={!copySource}>Copy</button>
+                        <button 
+                          onClick={() => {
+                            if (!copySource) return;
+                            const sourcePlan = savedPlans.find(p => p.month === copySource);
+                            if (sourcePlan) {
+                              setTotalBudget(sourcePlan.totalBudget);
+                              setCatBudgets({
+                                food: sourcePlan.categoryBudgets?.food || "",
+                                travel: sourcePlan.categoryBudgets?.travel || "",
+                                bills: sourcePlan.categoryBudgets?.bills || "",
+                                shopping: sourcePlan.categoryBudgets?.shopping || "",
+                                entertainment: sourcePlan.categoryBudgets?.entertainment || "",
+                                others: sourcePlan.categoryBudgets?.others || "",
+                              });
+                              setActiveSidebar(null);
+                            }
+                          }} 
+                          className={`w-full px-3 py-2 rounded-xl text-sm font-bold transition-all ${!copySource ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-teal-600 text-white hover:bg-teal-700 shadow-md flex items-center justify-center gap-2'}`} 
+                          disabled={!copySource}
+                        >
+                          Load Template
+                        </button>
                       </div>
                     </div>
                   )}
-                  {savedPlans.length === 0 && <div className="text-xs text-slate-500">No saved plans yet.</div>}
-                  {savedPlans.map((p) => (
-                    <button key={p.month} onClick={() => loadPlanIntoEditor(p.month)} className={`w-full text-left px-3 py-2 rounded-lg border flex items-center justify-between ${activeSidebar===p.month? 'bg-teal-50 border-teal-200': 'bg-white'}`}>
-                      <div>
-                        <div className="text-sm font-medium">{new Date(p.month + "-01").toLocaleString(undefined, { month: 'long', year: 'numeric' })}</div>
-                        <div className="text-xs text-slate-500">₹ {p.totalBudget.toLocaleString()}</div>
-                      </div>
-                      <div className="text-xs text-slate-400">View</div>
-                    </button>
-                  ))}
+                  
+                  {savedPlans.length === 0 && <div className="text-sm font-medium text-slate-400 p-4text-center bg-slate-50 rounded-xl mt-4">No saved plans yet.</div>}
+                  
+                  <div className="space-y-2 mt-4 max-h-[50vh] overflow-y-auto pr-1">
+                    {savedPlans.map((p) => (
+                      <button 
+                        key={p.month} 
+                        onClick={() => loadPlanIntoEditor(p.month)} 
+                        className={`w-full group text-left px-4 py-3 rounded-xl border transition-all flex items-center justify-between ${activeSidebar === p.month ? 'bg-teal-50/50 border-teal-300 shadow-sm' : 'bg-white border-slate-100 hover:border-slate-300'}`}
+                      >
+                        <div>
+                          <div className={`text-sm font-bold ${activeSidebar === p.month ? 'text-teal-800' : 'text-slate-700'}`}>
+                            {new Date(p.month + "-01").toLocaleString(undefined, { month: 'long', year: 'numeric' })}
+                          </div>
+                          <div className="text-xs font-semibold text-slate-500 mt-0.5">₹ {p.totalBudget.toLocaleString()}</div>
+                        </div>
+                        <FiChevronRight className={`text-xl transition-transform ${activeSidebar === p.month ? 'text-teal-600' : 'text-slate-300 group-hover:translate-x-1 group-hover:text-slate-500'}`} />
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </aside>
+            </div>
+          </aside>
 
-            {/* Main editor: spans 3 columns on md */}
-            <section className="md:col-span-3">
-              <div className="mt-0 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div className="md:col-span-2">
-                  <label className="block text-xs text-slate-600 mb-2">Select month</label>
-                  <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-500" />
+          {/* Main editor */}
+          <section className="md:col-span-3 space-y-8">
+            <div className="rounded-3xl bg-white border border-slate-100 p-8 shadow-sm">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-1"><FiCalendar /> Month Selection</label>
+                  <input 
+                    type="month" 
+                    value={month} 
+                    onChange={(e) => setMonth(e.target.value)} 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 font-semibold text-slate-800 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:bg-white outline-none transition-all shadow-sm" 
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-slate-600 mb-2">Total budget (INR)</label>
-                  <input type="number" value={typeof totalBudget === 'number' ? totalBudget : ''} onChange={(e) => setTotalBudget(e.target.value === "" ? "" : Number(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-gray-500" />
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-1"><FiDollarSign /> Total Budget (INR)</label>
+                  <input 
+                    type="number" 
+                    value={typeof totalBudget === 'number' ? totalBudget : ''} 
+                    onChange={(e) => setTotalBudget(e.target.value === "" ? "" : Number(e.target.value))} 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 font-semibold text-slate-800 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:bg-white outline-none transition-all shadow-sm" 
+                    placeholder="e.g. 50000"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="rounded-3xl bg-white border border-slate-100 p-8 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+                <div>
+                  <h3 className="text-xl font-bold flex items-center gap-2"><FiPieChart className="text-teal-500" /> Category Budgets</h3>
+                  <p className="text-sm font-medium text-slate-500 mt-1">Distribute your total budget across categories.</p>
+                </div>
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-right min-w-[200px]">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wide">Remaining Budget</div>
+                  <div className={`text-2xl font-extrabold mt-1 ${sumCat > Number(totalBudget) ? 'text-red-500' : 'text-slate-800'}`}>
+                    ₹ {totalBudget === "" ? 0 : Math.max(0, Number(totalBudget) - sumCat).toLocaleString()}
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-                  <div className="md:col-span-2">
-                    <h3 className="text-sm font-semibold">Category budgets</h3>
-                    <p className="text-xs text-slate-500 mt-1">Distribute your total budget across categories.</p>
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg relative overflow-hidden mb-8">
+                <div className="absolute right-0 bottom-0 w-48 h-48 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 mb-4">
+                  <div>
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Currently Allocated</div>
+                    <div className="text-3xl font-extrabold text-white mt-1">₹ {sumCat.toLocaleString()}</div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm text-slate-500">Remaining</div>
-                    <div className="text-xl font-semibold">₹ {totalBudget === "" ? 0 : Math.max(0, Number(totalBudget) - sumCat).toLocaleString()}</div>
-                  </div>
-                </div>
-
-                <div className="mt-4 p-4 rounded-lg bg-slate-200 border border-slate-100">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <div className="text-xs text-slate-500">Allocated</div>
-                      <div className="text-lg font-semibold">₹ {sumCat.toLocaleString()}</div>
-                    </div>
-                    <div className="w-48">
-                      <div className="h-2 bg-white rounded-full overflow-hidden border border-slate-100">
-                        <div className="h-2 bg-rose-400" style={{ width: `${totalBudget === "" ? 0 : Math.min(100, (sumCat / Number(totalBudget)) * 100)}%` }} />
-                      </div>
-                      <div className="text-xs text-slate-500 text-right mt-1">{totalBudget === "" ? 0 : Math.round((sumCat / Number(totalBudget)) * 100)}% allocated</div>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
+                  
+                  <div className="flex gap-3">
                     <button onClick={() => {
-                      // even distribute: split total equally among categories
                       if (totalBudget === "" || Number(totalBudget) <= 0) return;
                       const per = Math.floor(Number(totalBudget) / categories.length);
                       const next: Record<string, number | ""> = {};
                       categories.forEach((c) => (next[c] = per));
                       setCatBudgets(next);
-                    }} className="px-3 py-1 text-sm bg-white rounded border">Evenly distribute</button>
+                    }} className="px-4 py-2 font-bold text-xs uppercase tracking-wider text-teal-100 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg transition-all backdrop-blur-sm">
+                      Evenly Distribute
+                    </button>
                     <button onClick={() => {
-                      // lightweight proportional distribution: 25% Food, then weighted split rest
                       if (totalBudget === "" || Number(totalBudget) <= 0) return;
                       const t = Number(totalBudget);
                       const next: Record<string, number | ""> = {};
                       const weights: Record<string, number> = { 
-                        food: 0.25, 
-                        travel: 0.15, 
-                        bills: 0.2, 
-                        shopping: 0.15, 
-                        entertainment: 0.15, 
-                        others: 0.1 
+                        food: 0.25, travel: 0.15, bills: 0.2, shopping: 0.15, entertainment: 0.15, others: 0.1 
                       };
                       categories.forEach((c) => (next[c] = Math.round((weights[c] || 0.1) * t)));
                       setCatBudgets(next);
-                    }} className="px-3 py-1 text-sm bg-white rounded border">Auto-distribute</button>
+                    }} className="px-4 py-2 font-bold text-xs uppercase tracking-wider text-slate-900 bg-teal-400 hover:bg-teal-300 rounded-lg shadow-[0_0_15px_rgba(45,212,191,0.4)] transition-all">
+                      <FiActivity className="inline mr-1" /> Auto-Distribute
+                    </button>
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {categories.map((c, index) => {
-                    const categoryLabel = ["Food", "Travel", "Bills", "Shopping", "Entertainment", "Others"][index];
-                    const val = typeof catBudgets[c] === 'number' ? catBudgets[c] : 0;
-                    const pct = totalBudget === "" || Number(totalBudget) === 0 ? 0 : Math.round((val / Number(totalBudget)) * 100);
-                    return (
-                      <div key={c} className="p-3 rounded-lg bg-white border border-slate-100 flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <div className="text-sm font-medium">{categoryLabel}</div>
-                            <div className="text-xs text-slate-400">{pct}%</div>
-                          </div>
-                          <div className="text-xs text-slate-500">Suggested: ₹ {Math.round((Number(totalBudget || 0) * 0.15))}</div>
-                        </div>
-                        <div className="w-36">
-                          <input type="number" value={typeof catBudgets[c] === 'number' ? catBudgets[c] : ''} onChange={(e) => updateCat(c, e.target.value)} className="w-full px-3 py-2 rounded-lg border-1 border-gray-500" />
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="w-full relative z-10">
+                  <div className="h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50 shadow-inner">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${sumCat > Number(totalBudget) ? 'bg-red-500' : 'bg-gradient-to-r from-teal-500 to-blue-500'}`} 
+                      style={{ width: `${totalBudget === "" ? 0 : Math.min(100, (sumCat / Number(totalBudget)) * 100)}%` }} 
+                    />
+                  </div>
+                  <div className="flex justify-between items-center mt-2 text-xs font-bold text-slate-400">
+                    <span>0%</span>
+                    <span>{totalBudget === "" ? 0 : Math.round((sumCat / Number(totalBudget)) * 100)}% allocated</span>
+                  </div>
                 </div>
               </div>
 
-              {error && <div className="text-sm text-red-600 mt-4">{error}</div>}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {categories.map((c, index) => {
+                  const categoryLabel = ["Food", "Travel", "Bills", "Shopping", "Entertainment", "Others"][index];
+                  const val = typeof catBudgets[c] === 'number' ? catBudgets[c] : 0;
+                  const pct = totalBudget === "" || Number(totalBudget) === 0 ? 0 : Math.round((val / Number(totalBudget)) * 100);
+                  
+                  return (
+                    <div key={c} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col xl:flex-row items-center justify-between gap-4 group hover:border-teal-300 transition-colors">
+                      <div className="flex-1 w-full">
+                        <div className="flex items-center justify-between xl:justify-start gap-3">
+                          <div className="text-sm font-bold text-slate-800 group-hover:text-teal-700 transition-colors uppercase tracking-wide">{categoryLabel}</div>
+                          <div className="text-xs font-black text-slate-400 bg-slate-200 px-2 py-0.5 rounded-full">{pct}%</div>
+                        </div>
+                        <div className="text-xs font-medium text-slate-500 mt-1">Suggested: ₹ {Math.round((Number(totalBudget || 0) * 0.15))}</div>
+                      </div>
+                      <div className="w-full xl:w-40 relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400 pointer-events-none">₹</span>
+                        <input 
+                          type="number" 
+                          value={typeof catBudgets[c] === 'number' ? catBudgets[c] : ''} 
+                          onChange={(e) => updateCat(c, e.target.value)} 
+                          className="w-full pl-7 pr-3 py-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-700 focus:ring-2 focus:ring-teal-500 outline-none transition-shadow shadow-sm" 
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
 
-              <div className="mt-6 flex items-center gap-3">
-                <button onClick={handleSave} className="inline-flex items-center gap-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white px-5 py-2 rounded-lg shadow">
-                  {saving ? 'Saving...' : 'Save plan'}
+              {error && (
+                <div className="mt-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3 text-red-700 text-sm font-bold animate-pulse">
+                  <FiActivity size={18} className="shrink-0" />
+                  {error}
+                </div>
+              )}
+
+              <div className="mt-8 pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-4">
+                <button 
+                  onClick={handleSave} 
+                  disabled={saving}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-teal-500/20 transform hover:-translate-y-0.5 transition-all outline-none"
+                >
+                  <FiSave size={18} />
+                  {saving ? 'Saving...' : 'Save Plan'}
                 </button>
-                {/* Delete button replaces previous Cancel action. Disabled when there is no saved plan for current month. */}
-                {/** compute whether current month has a saved plan */}
+                
                 {(() => {
                   const hasPlan = savedPlans.some((p) => p.month === month);
                   return (
-                    <button onClick={handleDeletePlan} disabled={!hasPlan} className={`px-4 py-2 rounded-lg border ${hasPlan ? 'border-red-400 text-red-600 hover:bg-red-50' : 'border-slate-200 text-slate-400'}`}>
-                      Delete plan
+                    <button 
+                      onClick={handleDeletePlan} 
+                      disabled={!hasPlan} 
+                      className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold border transition-all inline-flex justify-center items-center gap-2 outline-none ${hasPlan ? 'border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300' : 'border-slate-200 text-slate-400 cursor-not-allowed bg-slate-50'}`}
+                    >
+                      <FiTrash2 size={18} />
+                      Delete
                     </button>
                   );
                 })()}
               </div>
-            </section>
-          </div>
+            </div>
+            
+          </section>
         </div>
       </main>
     </div>

@@ -2,8 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
+import { 
+  FiEye, 
+  FiEyeOff, 
+  FiArrowRight, 
+  FiMail, 
+  FiLock,
+  FiActivity,
+  FiZap,
+  FiShield,
+  FiTrendingUp
+} from "react-icons/fi";
 
 const BACKEND_URL = "";
 
@@ -64,86 +74,97 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-white py-12 px-4">
-      <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg overflow-hidden grid grid-cols-1 md:grid-cols-2">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 selection:bg-teal-200 text-slate-900 font-sans">
+      <div className="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200 overflow-hidden grid grid-cols-1 md:grid-cols-2">
 
-        {/* Left features panel (hidden on small screens) */}
-        <div className="hidden md:flex flex-col justify-center gap-6 p-8 bg-gradient-to-br from-teal-600 to-teal-400 text-white">
-          <h3 className="text-2xl font-semibold">Why people love FinSense</h3>
-          <ul className="space-y-4">
-            <li className="flex items-start gap-3">
-              <span className="flex-shrink-0 mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </span>
-              <div>
-                <div className="font-medium">Smart spending insights</div>
-                <div className="text-sm opacity-90">Auto-categorize and highlight saving opportunities.</div>
+        {/* Left features panel */}
+        <div className="hidden md:flex flex-col justify-center gap-8 p-12 bg-gradient-to-br from-slate-900 to-slate-800 text-white relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-64 h-64 bg-teal-500/20 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2"></div>
+          <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl translate-y-1/2 translate-x-1/2"></div>
+          
+          <div className="relative z-10 space-y-10">
+            <div>
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-teal-400 shadow-lg shadow-teal-500/30 flex items-center justify-center text-white text-xl font-bold tracking-tighter ring-4 ring-white/10 mb-6">
+                FS
               </div>
-            </li>
+              <h3 className="text-3xl font-extrabold tracking-tight">Why people love FinSense</h3>
+            </div>
+            
+            <ul className="space-y-6">
+              <li className="flex items-start gap-4">
+                <span className="flex-shrink-0 mt-1 inline-flex h-8 w-8 items-center justify-center rounded-xl bg-teal-500/20 text-teal-400 border border-teal-500/30">
+                   <FiZap size={16} />
+                </span>
+                <div>
+                  <div className="font-bold text-lg">Smart spending insights</div>
+                  <div className="text-sm text-slate-400 font-medium">Auto-categorize and highlight saving opportunities instantly.</div>
+                </div>
+              </li>
 
-            <li className="flex items-start gap-3">
-              <span className="flex-shrink-0 mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2v4h6v-4c0-1.105-1.343-2-3-2zM6 20h12" />
-                </svg>
-              </span>
-              <div>
-                <div className="font-medium">Goal-based projections</div>
-                <div className="text-sm opacity-90">See how small changes affect long-term goals.</div>
-              </div>
-            </li>
+              <li className="flex items-start gap-4">
+                <span className="flex-shrink-0 mt-1 inline-flex h-8 w-8 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                   <FiTrendingUp size={16} />
+                </span>
+                <div>
+                  <div className="font-bold text-lg">Goal-based projections</div>
+                  <div className="text-sm text-slate-400 font-medium">See exactly how small daily changes affect your long-term goals.</div>
+                </div>
+              </li>
 
-            <li className="flex items-start gap-3">
-              <span className="flex-shrink-0 mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M3 7v4a4 4 0 004 4h10a4 4 0 004-4V7" />
-                </svg>
-              </span>
-              <div>
-                <div className="font-medium">Privacy-first</div>
-                <div className="text-sm opacity-90">We keep your financial data secure and private.</div>
-              </div>
-            </li>
-          </ul>
+              <li className="flex items-start gap-4">
+                <span className="flex-shrink-0 mt-1 inline-flex h-8 w-8 items-center justify-center rounded-xl bg-green-500/20 text-green-400 border border-green-500/30">
+                   <FiShield size={16} />
+                </span>
+                <div>
+                  <div className="font-bold text-lg">Privacy-first guarantee</div>
+                  <div className="text-sm text-slate-400 font-medium">We keep your financial data strictly secure and completely private.</div>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* Right: form */}
-        <div className="p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-white rounded-full p-1 ring-1 ring-slate-100">
-              <Image src="/logo-mark.svg" alt="FinSense" width={40} height={40} />
-            </div>
-            <div>
-              <h2 className="text-2xl text-black font-semibold">Welcome back</h2>
-              <p className="text-sm text-slate-500">Sign in to access your dashboard.</p>
-            </div>
+        <div className="py-12 px-8 sm:px-16 flex flex-col justify-center">
+          <div className="mb-10">
+            <h2 className="text-3xl text-slate-800 font-extrabold tracking-tight mb-2">Welcome back</h2>
+            <p className="text-sm font-medium text-slate-500">Enter your credentials to access your dashboard.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5 border-b border-slate-100 pb-8 mb-6">
             <div>
-              <label htmlFor="email" className="block text-xs text-slate-600 mb-2">Email</label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-200 bg-slate-50 placeholder-slate-400 text-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-shadow"
-                placeholder="you@example.com"
-                aria-label="Email"
-              />
+              <label htmlFor="email" className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Email Address</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiMail className="text-slate-400" />
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 border border-slate-200 bg-slate-50 font-semibold text-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:bg-white transition-all shadow-sm"
+                  placeholder="you@example.com"
+                  aria-label="Email"
+                />
+              </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs text-slate-600 mb-2">Password</label>
+              <div className="flex justify-between items-center mb-2">
+                <label htmlFor="password" className="block text-xs font-bold text-slate-500 uppercase tracking-wide">Password</label>
+                <a href="#" className="flex-shrink-0 text-xs font-bold text-teal-600 hover:text-teal-700 transition-colors">Forgot?</a>
+              </div>
               <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiLock className="text-slate-400" />
+                </div>
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-slate-200 bg-slate-50 placeholder-slate-400 text-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-shadow pr-12"
+                  className="w-full pl-11 pr-12 py-3 border border-slate-200 bg-slate-50 font-semibold text-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:bg-white transition-all shadow-sm"
                   placeholder="Your password"
                   aria-label="Password"
                 />
@@ -151,39 +172,38 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute inset-y-0 right-3 flex items-center px-2 text-slate-500 hover:text-slate-700"
+                  className="absolute inset-y-0 right-3 flex items-center px-2 text-slate-400 hover:text-teal-600 transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 block" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0 1 12 19c-5.523 0-10-4.477-10-10a9.97 9.97 0 0 1 1.175-4.375M3 3l18 18" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 block" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M1.05 12a10.02 10.02 0 0 1 1.53-3.46A10.025 10.025 0 0 1 12 3c5.523 0 10 4.477 10 9 0 1.18-.23 2.31-.66 3.33M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                    </svg>
-                  )}
+                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                 </button>
               </div>
             </div>
 
-            {error && <div className="text-sm text-red-600">{error}</div>}
-            {success && <div className="text-sm text-emerald-600">{success}</div>}
+            {error && (
+              <div className="p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3 text-red-700 text-sm font-bold animate-pulse">
+                <FiActivity size={18} className="shrink-0" />
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center gap-3 text-emerald-700 text-sm font-bold">
+                <FiShield size={18} className="shrink-0" />
+                {success}
+              </div>
+            )}
 
             <button
               type="submit"
-              className={`w-full inline-flex items-center justify-center bg-gradient-to-r from-teal-500 to-teal-400 text-white px-4 py-3 rounded-lg font-medium shadow hover:brightness-95 transform hover:-translate-y-0.5 transition ${loading ? 'opacity-80 cursor-wait' : ''}`}
+              className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white px-6 py-4 rounded-xl font-bold shadow-lg shadow-teal-500/20 transform hover:-translate-y-0.5 transition-all outline-none mt-2 ${loading ? 'opacity-80 cursor-wait' : ''}`}
               disabled={loading}
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Authenticating...' : 'Sign in securely'} <FiArrowRight />
             </button>
           </form>
 
-          <div className="mt-4 flex items-center justify-between text-sm text-slate-600">
-            <div>
-              Don&apos;t have an account? <Link className="text-teal-600 hover:underline" href="/signup">Create account</Link>
-            </div>
-            <a href="#" className="text-slate-500 hover:underline">Forgot?</a>
+          <div className="text-center text-sm font-medium text-slate-600">
+            Don't have an account? <Link className="text-teal-600 font-bold hover:text-teal-700 transition-colors" href="/signup">Create account</Link>
           </div>
         </div>
       </div>

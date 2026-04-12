@@ -2,7 +2,18 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { FaUser, FaCalendarAlt, FaRedo } from "react-icons/fa";
+import { 
+  FiUser, 
+  FiCalendar, 
+  FiRefreshCw,
+  FiPhone,
+  FiMapPin,
+  FiMail,
+  FiEdit2,
+  FiCamera,
+  FiDollarSign,
+  FiActivity
+} from "react-icons/fi";
 
 const BACKEND_URL = "";
 
@@ -130,66 +141,90 @@ export default function Profile() {
     switch (activeTab) {
       case "profile":
         return (
-          <div className="bg-white shadow-lg rounded-xl p-8">
+          <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 p-8 lg:p-12">
             {loading ? (
-              <div className="flex items-center justify-center py-12">
+              <div className="flex items-center justify-center py-20">
                 <div className="text-center">
-                  <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-slate-600">Loading profile...</p>
+                  <div className="w-14 h-14 border-4 border-teal-100 border-t-teal-500 rounded-full animate-spin mx-auto mb-6 shadow-lg shadow-teal-500/20"></div>
+                  <p className="text-sm font-bold text-slate-500 uppercase tracking-widest animate-pulse">Loading Profile</p>
                 </div>
               </div>
             ) : error ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-center text-red-600">
-                  <p className="text-lg font-semibold">Error</p>
-                  <p className="text-sm">{error}</p>
+              <div className="flex items-center justify-center py-16">
+                <div className="text-center p-8 bg-red-50 rounded-3xl border border-red-100 max-w-sm">
+                  <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FiActivity size={24} />
+                  </div>
+                  <h3 className="text-lg font-bold text-red-700 mb-2">Sync Error</h3>
+                  <p className="text-sm text-red-500 font-medium">{error}</p>
                 </div>
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-6 mb-8">
-                  <div className="w-20 h-20 bg-teal-500 text-white rounded-full flex items-center justify-center text-3xl font-bold shadow-md overflow-hidden">
-                    {user.profileImage ? (
-                      <Image
-                        src={user.profileImage}
-                        alt="Profile"
-                        width={80}
-                        height={80}
-                        className="rounded-full object-cover"
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-12">
+                  <div className="relative group">
+                    <div className="w-32 h-32 bg-gradient-to-br from-teal-500 to-teal-400 text-white rounded-[2rem] flex items-center justify-center text-5xl font-black shadow-xl shadow-teal-500/30 overflow-hidden ring-4 ring-slate-50 relative z-10 transition-transform group-hover:scale-105">
+                      {user.profileImage ? (
+                        <Image
+                          src={user.profileImage}
+                          alt="Profile"
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        user.name.charAt(0)
+                      )}
+                    </div>
+                    
+                    {/* Floating camera button overlay */}
+                    <label className="absolute -bottom-3 -right-3 w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg shadow-slate-900/20 cursor-pointer z-20 hover:bg-slate-800 hover:scale-110 transition-all border-4 border-white">
+                      <FiCamera size={18} />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageUpload}
                       />
-                    ) : (
-                      user.name.charAt(0)
-                    )}
+                    </label>
                   </div>
-                  <div>
-                    <h2 className="text-3xl font-bold text-slate-800">{user.name}</h2>
-                    <p className="text-sm text-slate-500">{user.email}</p>
+
+                  <div className="text-center md:text-left flex-1">
+                    <h2 className="text-3xl font-extrabold text-slate-800 mb-1">{user.name}</h2>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-50 text-teal-600 rounded-full text-sm font-bold mb-4">
+                      <FiMail size={14} /> {user.email}
+                    </div>
+                    <p className="text-sm font-medium text-slate-500">Manage your FinSense profile, settings, and personal data securely from this dashboard.</p>
+                  </div>
+                  
+                  <div className="hidden md:block">
+                     <button className="flex items-center gap-2 px-6 py-3 bg-slate-50 text-slate-700 hover:bg-slate-100 rounded-xl font-bold border border-slate-200 transition-colors">
+                       <FiEdit2 size={16} /> Edit
+                     </button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="bg-slate-50 p-4 rounded-lg shadow">
-                    <h3 className="text-sm font-medium text-slate-500">Phone</h3>
-                    <p className="text-lg font-semibold text-slate-800 mt-1">{user.phone}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                  <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 hover:border-teal-200 hover:bg-white hover:shadow-lg transition-all group">
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                       <FiPhone size={18} />
+                    </div>
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Phone Number</h3>
+                    <p className="text-lg font-bold text-slate-800">{user.phone}</p>
                   </div>
-                  <div className="bg-slate-50 p-4 rounded-lg shadow">
-                    <h3 className="text-sm font-medium text-slate-500">Address</h3>
-                    <p className="text-lg font-semibold text-slate-800 mt-1">{user.address}</p>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-lg shadow">
-                    <h3 className="text-sm font-medium text-slate-500">Upload Profile Image</h3>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="mt-2 text-slate-800 border-1 pl-2 rounded-[10px]"
-                      onChange={handleImageUpload}
-                    />
+                  
+                  <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 hover:border-teal-200 hover:bg-white hover:shadow-lg transition-all group">
+                    <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                       <FiMapPin size={18} />
+                    </div>
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Billing Address</h3>
+                    <p className="text-lg font-bold text-slate-800 truncate">{user.address}</p>
                   </div>
                 </div>
 
-                <div className="mt-8 text-center">
-                  <button className="px-6 py-3 bg-gradient-to-r from-teal-500 to-teal-400 text-white rounded-lg shadow-md hover:from-teal-600 hover:to-teal-500 transition text-lg font-medium">
-                    Edit Profile
+                {/* Mobile edit button */}
+                <div className="md:hidden mt-8">
+                  <button className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-teal-600 to-teal-500 text-white rounded-xl shadow-lg shadow-teal-500/20 font-bold">
+                    <FiEdit2 size={18} /> Edit Profile Data
                   </button>
                 </div>
               </>
@@ -198,41 +233,83 @@ export default function Profile() {
         );
       case "previousMonths":
         return (
-          <div className="bg-white shadow-lg rounded-xl p-8">
-            <h2 className="text-2xl font-bold text-slate-800 mb-4">Previous Months Data</h2>
-            <p className="text-sm text-slate-500">Here you can view your previous months&#39; financial data.</p>
-            {/* Add detailed data visualization here */}
+          <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 p-8 lg:p-12">
+            <div className="flex items-center gap-4 mb-8 pb-6 border-b border-slate-100">
+               <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center shadow-inner">
+                 <FiCalendar size={22} />
+               </div>
+               <div>
+                  <h2 className="text-2xl font-extrabold text-slate-800">Historical Archives</h2>
+                  <p className="text-sm font-medium text-slate-500 mt-1">Review your financial timeline and performance.</p>
+               </div>
+            </div>
+            
+            <div className="p-12 bg-slate-50 rounded-3xl border border-slate-200 border-dashed flex flex-col items-center justify-center text-center">
+               <FiActivity size={32} className="text-slate-300 mb-4" />
+               <h3 className="text-lg font-bold text-slate-700 mb-2">No Past Data Gathered</h3>
+               <p className="text-sm text-slate-500 max-w-sm">Once you complete a full month with FinSense, your comparative analytics will appear right here.</p>
+            </div>
           </div>
         );
       case "recurringExpenses":
         return (
-          <div className="bg-white shadow-lg rounded-xl p-8">
-            <h2 className="text-2xl font-bold text-slate-800 mb-4">Recurring Expenses</h2>
-            <p className="text-sm text-slate-500 mb-6">List of subscriptions and recurring expenses will be displayed here.</p>
+          <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 p-8 lg:p-12">
+            <div className="flex items-center gap-4 mb-8 pb-6 border-b border-slate-100">
+               <div className="w-12 h-12 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center shadow-inner">
+                 <FiRefreshCw size={22} />
+               </div>
+               <div>
+                  <h2 className="text-2xl font-extrabold text-slate-800">Recurring Liabilities</h2>
+                  <p className="text-sm font-medium text-slate-500 mt-1">Active subscriptions and monthly set expenses.</p>
+               </div>
+            </div>
 
             {recurringLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-center">
-                  <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-slate-600">Loading recurring expenses...</p>
-                </div>
-              </div>
+               <div className="flex items-center justify-center py-20">
+                 <div className="text-center">
+                   <div className="w-14 h-14 border-4 border-slate-100 border-t-slate-500 rounded-full animate-spin mx-auto mb-6"></div>
+                   <p className="text-sm font-bold text-slate-400 uppercase tracking-widest animate-pulse">Scanning Expenses</p>
+                 </div>
+               </div>
             ) : recurringError ? (
-              <div className="text-red-600 p-4 rounded-md">{recurringError}</div>
+               <div className="text-center p-6 bg-red-50 rounded-2xl border border-red-100 text-red-600 font-bold mb-6">
+                 {recurringError}
+               </div>
             ) : recurringExpenses.length === 0 ? (
-              <div className="text-slate-600 p-4">No recurring expenses found.</div>
+               <div className="p-12 bg-slate-50 rounded-3xl border border-slate-200 border-dashed flex flex-col items-center justify-center text-center">
+                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-300 mb-4">
+                   <FiDollarSign size={24} />
+                 </div>
+                 <h3 className="text-lg font-bold text-slate-700 mb-2">No active subscriptions</h3>
+                 <p className="text-sm text-slate-500 max-w-sm">Mark expenses as recurring in your dashboard to see them auto-populated here.</p>
+               </div>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {recurringExpenses.map((exp, idx) => (
-                  <div key={exp._id || idx} className="p-4 border rounded-lg shadow-sm flex justify-between items-start">
-                    <div>
-                      <div className="text-sm text-slate-500">{exp.date ? new Date(exp.date).toLocaleDateString() : '—'}</div>
-                      <div className="text-lg font-semibold text-slate-800">{exp.merchant || exp.category || 'Expense'}</div>
-                      <div className="text-sm text-slate-500 mt-1">{exp.notes}</div>
+                  <div key={exp._id || idx} className="p-6 bg-white border border-slate-200 rounded-2xl hover:border-teal-300 hover:shadow-lg transition-all group flex flex-col justify-between">
+                    <div className="flex justify-between items-start mb-6">
+                       <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold">
+                         {exp.merchant ? exp.merchant.charAt(0).toUpperCase() : 'E'}
+                       </div>
+                       <div className="bg-teal-50 text-teal-600 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                         <FiRefreshCw size={10} /> Active
+                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-slate-800">₹{exp.amount}</div>
-                      <div className="text-xs text-slate-500 mt-1">{exp.recurring ? 'Recurring' : ''}</div>
+                    
+                    <div>
+                      <h4 className="text-lg font-bold text-slate-800 truncate mb-1">{exp.merchant || exp.category || 'Logged Expense'}</h4>
+                      <p className="text-sm font-medium text-slate-500 truncate mb-4">{exp.notes || 'No description provided'}</p>
+                      
+                      <div className="flex items-end justify-between pt-4 border-t border-slate-100">
+                        <div>
+                           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Process Date</div>
+                           <div className="text-sm font-bold text-slate-700">{exp.date ? new Date(exp.date).toLocaleDateString() : 'Auto'}</div>
+                        </div>
+                        <div className="text-right">
+                           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Amount</div>
+                           <div className="text-xl font-black text-slate-800 group-hover:text-teal-600 transition-colors">₹{exp.amount?.toLocaleString()}</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -246,37 +323,62 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-800 flex px-32">
-      <aside className="w-64 bg-white shadow-md p-6 rounded-lg h-screen">
-        <nav className="space-y-4">
-          <button
-            className={`w-full flex items-center gap-4 text-left px-4 py-2 rounded-lg font-medium border border-slate-300 transition-all duration-200 ${
-              activeTab === "profile" ? "bg-teal-500 text-white" : "text-slate-700 hover:bg-slate-100"
-            }`}
-            onClick={() => setActiveTab("profile")}
-          >
-            <FaUser className="text-lg" /> Profile
-          </button>
-          <button
-            className={`w-full flex items-center gap-4 text-left px-4 py-2 rounded-lg font-medium border border-slate-300 transition-all duration-200 ${
-              activeTab === "previousMonths" ? "bg-teal-500 text-white" : "text-slate-700 hover:bg-slate-100"
-            }`}
-            onClick={() => setActiveTab("previousMonths")}
-          >
-            <FaCalendarAlt className="text-lg" /> Previous Months Data
-          </button>
-          <button
-            className={`w-full flex items-center gap-4 text-left px-4 py-2 rounded-lg font-medium border border-slate-300 transition-all duration-200 ${
-              activeTab === "recurringExpenses" ? "bg-teal-500 text-white" : "text-slate-700 hover:bg-slate-100"
-            }`}
-            onClick={() => setActiveTab("recurringExpenses")}
-          >
-            <FaRedo className="text-lg" /> Recurring Expenses
-          </button>
-        </nav>
-      </aside>
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-teal-200">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
+        
+        {/* Page Header */}
+        <div className="mb-10">
+           <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">Account Settings</h1>
+           <p className="text-sm font-medium text-slate-500 mt-1">Manage your identity, recurring rules, and preferences.</p>
+        </div>
 
-      <main className="flex-1 p-6">{renderContent()}</main>
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* Sidebar Navigation */}
+          <aside className="w-full lg:w-72 shrink-0">
+            <div className="sticky top-8 space-y-2">
+              <button
+                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all shadow-sm ${
+                  activeTab === "profile" 
+                    ? "bg-gradient-to-r from-teal-600 to-teal-500 text-white shadow-teal-500/20 transform scale-[1.02]" 
+                    : "bg-white text-slate-600 border border-slate-100 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+                }`}
+                onClick={() => setActiveTab("profile")}
+              >
+                <FiUser size={20} className={activeTab === "profile" ? "text-teal-100" : "text-slate-400"} /> Personal Info
+              </button>
+              
+              <button
+                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all shadow-sm ${
+                  activeTab === "recurringExpenses" 
+                    ? "bg-gradient-to-r from-teal-600 to-teal-500 text-white shadow-teal-500/20 transform scale-[1.02]" 
+                    : "bg-white text-slate-600 border border-slate-100 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+                }`}
+                onClick={() => setActiveTab("recurringExpenses")}
+              >
+                <FiRefreshCw size={20} className={activeTab === "recurringExpenses" ? "text-teal-100" : "text-slate-400"} /> Recurring Logs
+              </button>
+
+              <button
+                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all shadow-sm ${
+                  activeTab === "previousMonths" 
+                    ? "bg-gradient-to-r from-teal-600 to-teal-500 text-white shadow-teal-500/20 transform scale-[1.02]" 
+                    : "bg-white text-slate-600 border border-slate-100 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+                }`}
+                onClick={() => setActiveTab("previousMonths")}
+              >
+                <FiCalendar size={20} className={activeTab === "previousMonths" ? "text-teal-100" : "text-slate-400"} /> History
+              </button>
+            </div>
+          </aside>
+
+          {/* Main Content Area */}
+          <main className="flex-1 min-w-0">
+            {renderContent()}
+          </main>
+          
+        </div>
+      </div>
     </div>
   );
 }
