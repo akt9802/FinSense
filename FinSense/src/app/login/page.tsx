@@ -153,7 +153,7 @@ export default function Login() {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label htmlFor="password" className="block text-xs font-bold text-slate-500 uppercase tracking-wide">Password</label>
-                <a href="#" className="flex-shrink-0 text-xs font-bold text-teal-600 hover:text-teal-700 transition-colors">Forgot?</a>
+                <Link href="/forgot-password" className="flex-shrink-0 text-xs font-bold text-teal-600 hover:text-teal-700 transition-colors">Forgot?</Link>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
