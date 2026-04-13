@@ -40,12 +40,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs && \
     adduser  --system --uid 1001 nextjs
 
-# Copy only what's needed to run the app
-COPY --from=builder /app/public         ./public
-COPY --from=builder /app/next.config.ts ./next.config.ts
-COPY --from=builder /app/.next          ./.next
-COPY --from=builder /app/node_modules   ./node_modules
-COPY --from=builder /app/package.json   ./package.json
+# Standalone output: server.js + dependencies are self-contained
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+# Static assets must be copied manually into the standalone folder
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static     ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public           ./public
 
 USER nextjs
 
@@ -54,4 +53,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["npm", "run", "start"]
+# Use node server.js — required for standalone output (next start does NOT work)
+CMD ["node", "server.js"]
