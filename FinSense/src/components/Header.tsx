@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiClient } from "@/utils/apiClient";
 
 const BACKEND_URL = "";
 
@@ -21,12 +22,8 @@ export default function Header() {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const response = await fetch(`${BACKEND_URL}/api/profile`, {
+        const response = await apiClient(`${BACKEND_URL}/api/profile`, {
           method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
         });
 
         if (response.ok) {
@@ -82,9 +79,9 @@ export default function Header() {
     try {
       const token = localStorage.getItem("token");
       if (token) {
-        await fetch("/api/auth/logout", {
+        await apiClient("/api/auth/logout", {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ refreshToken: localStorage.getItem("refreshToken") }),
         });
       }
     } catch { /* silent */ }

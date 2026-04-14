@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { apiClient } from "@/utils/apiClient";
 import { 
   FiUser, 
   FiCalendar, 
@@ -47,19 +48,14 @@ export default function Profile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!localStorage.getItem("token")) {
           setError("No authentication token found");
           setLoading(false);
           return;
         }
 
-        const response = await fetch(`${BACKEND_URL}/api/profile`, {
+        const response = await apiClient(`${BACKEND_URL}/api/profile`, {
           method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
         });
 
         if (response.ok) {
@@ -92,20 +88,15 @@ export default function Profile() {
       setRecurringError("");
       setRecurringLoading(true);
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!localStorage.getItem("token")) {
           setRecurringError("No authentication token found");
           setRecurringExpenses([]);
           setRecurringLoading(false);
           return;
         }
 
-        const res = await fetch(`${BACKEND_URL}/api/recurringexpenses`, {
+        const res = await apiClient(`${BACKEND_URL}/api/recurringexpenses`, {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
         });
 
         if (res.ok) {
@@ -139,13 +130,8 @@ export default function Profile() {
       
       try {
         setIsUploading(true);
-        const token = localStorage.getItem("token");
-        const res = await fetch(`${BACKEND_URL}/api/profile`, {
+        const res = await apiClient(`${BACKEND_URL}/api/profile`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
           body: JSON.stringify({ profileImage: base64String })
         });
         

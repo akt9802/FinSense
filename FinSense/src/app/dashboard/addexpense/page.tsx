@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { apiClient } from "@/utils/apiClient";
 import { 
   FiDollarSign, 
   FiCalendar, 
@@ -53,21 +54,22 @@ export default function AddExpense() {
       }
 
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/recurringexpenses`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await apiClient(`${API_BASE_URL}/api/recurringexpenses`, {
+          method: "GET",
         });
-        setRecurringExpenses(response.data.recurringExpenses.map((expense: { _id: string; amount: number; merchant: string; category: string }) => ({
+
+        const data = await response.json();
+        if (!response.ok) {
+          setError(data?.error || "Failed to fetch recurring expenses.");
+          return;
+        }
+
+        setRecurringExpenses((data.recurringExpenses || []).map((expense: { _id: string; amount: number; merchant: string; category: string }) => ({
           ...expense,
           _id: expense._id,
         })));
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.error || "Failed to fetch recurring expenses.");
-        } else {
-          setError("An unexpected error occurred.");
-        }
+      } catch {
+        setError("An unexpected error occurred.");
       }
     }
 
@@ -161,19 +163,19 @@ export default function AddExpense() {
     }
 
     try {
-      await axios.put(`${API_BASE_URL}/api/update-recurring/${expenseId}`, null, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await apiClient(`${API_BASE_URL}/api/update-recurring/${expenseId}`, {
+        method: "PUT",
       });
 
-      setRecurringExpenses((prev) => prev.filter((_, i) => i !== index));
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.error || "Failed to update recurring expense.");
-      } else {
-        setError("An unexpected error occurred.");
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        setError(data?.error || "Failed to update recurring expense.");
+        return;
       }
+
+      setRecurringExpenses((prev) => prev.filter((_, i) => i !== index));
+    } catch {
+      setError("An unexpected error occurred.");
     }
   }
 

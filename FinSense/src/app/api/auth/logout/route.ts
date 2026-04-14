@@ -1,18 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import User from '@/models/User';
-import { getUserFromRequest } from '@/utils/auth';
+import { getUserFromRequest, verifyRefreshToken } from '@/utils/auth';
 
 export async function POST(req: NextRequest) {
   try {
     const decoded = getUserFromRequest(req);
-    if (!decoded) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+
+    let refreshToken = '';
+    try {
+      const body = await req.json();
+      refreshToken = body?.refreshToken || '';
+    } catch {
+      // no-op: allow logout via Authorization header only
     }
 
     await connectDB();
 
-    await User.findByIdAndUpdate(decoded.id, { refreshToken: '' });
+    if (decoded?.id) {
+      await User.findByIdAndUpdate(decoded.id, { refreshToken: '' });
+      return NextResponse.json({ message: 'Logged out successfully' }, { status: 200 });
+    }
+
+    // Fallback: if access token expired, allow logout with valid refresh token
+    const refreshDecoded = refreshToken ? verifyRefreshToken(refreshToken) : null;
+    if (!refreshDecoded?.id) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const user = await User.findById(refreshDecoded.id);
+    if (!user || user.refreshToken !== refreshToken) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    user.refreshToken = '';
+    await user.save();
 
     return NextResponse.json({ message: 'Logged out successfully' }, { status: 200 });
   } catch (error: any) {
