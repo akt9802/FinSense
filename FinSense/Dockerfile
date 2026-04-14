@@ -1,32 +1,38 @@
+# syntax=docker/dockerfile:1
 # ─── Stage 1: Install dependencies ───────────────────────────────────────────
+# Uses BuildKit cache mounts so npm ci is fast on re-runs
+# (node_modules layer is only rebuilt if package-lock.json changes)
 FROM node:20-alpine AS deps
 
 WORKDIR /app
 
-# Install libc compat for native modules (bcrypt, etc.)
+# Install native build tools once. Cached by Docker layer unless Alpine version changes.
 RUN apk add --no-cache libc6-compat python3 make g++
 
 COPY package.json package-lock.json ./
-RUN npm ci --legacy-peer-deps
+
+# --mount=type=cache keeps npm's download cache on the build machine.
+# Second build: npm ci completes in seconds because packages are already cached.
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --legacy-peer-deps
 
 # ─── Stage 2: Build the Next.js app ───────────────────────────────────────────
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy installed node_modules from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Build args that get baked into the image at build time
-# (NEXT_PUBLIC_* vars only – secrets go in runtime .env)
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
-
-# Enable standalone output so we get a minimal production server
+ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN npm run build
+# Copy deps first — this layer is cached until package-lock.json changes
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source files — layer is invalidated only when source changes
+COPY . .
+
+# Cache Next.js build cache between runs for even faster rebuilds
+RUN --mount=type=cache,target=/app/.next/cache \
+    npm run build
 
 # ─── Stage 3: Minimal production image ────────────────────────────────────────
 FROM node:20-alpine AS runner

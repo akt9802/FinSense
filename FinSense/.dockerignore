@@ -1,35 +1,42 @@
-# Dependencies (re-installed inside container)
+# ── Dependencies (always re-installed inside container) ────────────────────────
 node_modules
 
-# Next.js build cache
+# ── Next.js build output ───────────────────────────────────────────────────────
 .next
 .turbo
 out
 dist
 build
 
-# Git
+# ── Large source assets not needed in build context ───────────────────────────
+# icon-source.png is 408KB — icons are generated locally, not during Docker build
+public/icon-source.png
+
+# ── Git ────────────────────────────────────────────────────────────────────────
 .git
 .gitignore
 .github
 
-# Env files – NEVER bake secrets into the image
+# ── Env files – NEVER bake secrets into the image ─────────────────────────────
 .env
 .env.*
 !.env.example
 
-# Editor / OS
+# ── Editor / OS ───────────────────────────────────────────────────────────────
 .DS_Store
 .vscode
 .idea
 *.pem
 *.log
 
-# Docker itself
+# ── Docker itself ─────────────────────────────────────────────────────────────
 Dockerfile
 .dockerignore
 docker-compose*.yml
 
-# Docs
+# ── Docs / local scripts ──────────────────────────────────────────────────────
 README*.md
 DEPLOYMENT*.md
+DOCKER_EXPLAINED*.md
+PWA_GUIDE*.md
+scripts/
